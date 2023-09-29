@@ -1,0 +1,48 @@
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  plugins: [
+    '@typescript-eslint',
+    'jest',
+    'prettier',
+  ],
+  env: {
+    commonjs: true,
+    es6: true,
+    node: true,
+    'jest/globals': true,
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+    'airbnb-base',
+    'airbnb-typescript/base',
+    'prettier',
+  ],
+  globals: {
+    Atomics: 'readonly',
+    SharedArrayBuffer: 'readonly',
+  },
+  parserOptions: {
+    ecmaVersion: 'latest',
+    project: './tsconfig-test.json',
+  },
+  rules: {
+    'prettier/prettier': 2,
+    'import/no-extraneous-dependencies': 'off',
+    'global-require': 'off',
+    'prefer-promise-reject-errors': 'off',
+    'no-empty': 'off',
+    'no-underscore-dangle': 'off',
+    'no-await-in-loop': 'off',
+    'no-restricted-syntax': 'off',
+    'no-template-curly-in-string': 'off',
+    'import/prefer-default-export': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/default-case': 'off',
+    'default-case': 'off',
+    'import/first': 'off',
+    'import/order': 'off',
+    'no-param-reassign': 'off',
+  },
+};

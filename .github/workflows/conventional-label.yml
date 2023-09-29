@@ -1,0 +1,17 @@
+name: conventional-commit-pr-labels
+
+on:
+  pull_request_target:
+    types: [opened, edited]
+
+permissions:
+    pull-requests: write
+
+jobs:
+  label-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: bcoe/conventional-release-labels@v1
+        with:
+          type_labels: '{"feat": "feature", "fix": "fix", "chore": "chore", "ci": "CI", "docs": "documentation", "refactor": "refactor", "test": "test"}'
+          ignored_types: '[]'
