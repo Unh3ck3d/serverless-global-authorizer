@@ -1,0 +1,9 @@
+node_modules
+.idea
+.vscode
+logs
+*.log
+npm-debug.log*
+.npm
+.serverless
+dist
