@@ -48,15 +48,17 @@ And the last thing is configuration of API Gateway authorizer
 custom:
   globalAuthorizer:
     # if you use REST API Gateway
-    restApiAuthorizer:  # configuration of authorizer looks the same as in serverless framework e.g. for lambda authorizer https://www.serverless.com/framework/docs/providers/aws/events/apigateway#http-endpoints-with-custom-authorizers
-      name: customAuthorizerRestApi
-      type: request
-      resultTtlInSeconds: 0
-      arn: arn:aws:lambda:us-east-1:11111111111:function:external
+    restApi:
+      authorizer:  # configuration of authorizer looks the same as in serverless framework e.g. for lambda authorizer https://www.serverless.com/framework/docs/providers/aws/events/apigateway#http-endpoints-with-custom-authorizers
+        name: customAuthorizerRestApi
+        type: request
+        resultTtlInSeconds: 0
+        arn: arn:aws:lambda:us-east-1:11111111111:function:external
 
     # if you use HTTP API Gateway
-    httpApiAuthorizer:
-      name: customAuthorizerHttpApi
+    httpApi:
+      authorizer:
+        name: customAuthorizerHttpApi
 
 
 provider:
@@ -74,8 +76,8 @@ provider:
 ## How it works
 
 After you define global authorizer under
-* `custom.globalAuthorizer.restApiAuthorizer` key - for REST API Gateway
-* `custom.globalAuthorizer.httpApiAuthorizer` key - for HTTP API Gateway
+* `custom.globalAuthorizer.restApi.authorizer` key - for REST API Gateway
+* `custom.globalAuthorizer.httpApi.authorizer` key - for HTTP API Gateway
 
 plugin will apply its configuration for all your lambda functions
 with matching event type (`http` or `httpApi`).

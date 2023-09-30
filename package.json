@@ -39,8 +39,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "lint": "yarn eslint src test",
-    "lint:fix": "yarn lint --fix",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
     "test": "jest --coverage --coverageReporters text"
   }
 }
