@@ -11,7 +11,7 @@ class ServerlessGlobalAuthorizerPlugin {
   }
 
   public init() {
-    this.serverless.service.getAllFunctions().forEach(this.processFunction.bind(this));
+    (this.serverless.service.getAllFunctions() || []).forEach(this.processFunction.bind(this));
   }
 
   private processFunction(functionName: string) {
