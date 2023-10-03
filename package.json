@@ -12,7 +12,7 @@
     "authorizer"
   ],
   "engines": {
-    "node": "v18"
+    "node": ">=12"
   },
   "readme": "README.md",
   "peerDependencies": {
