@@ -2,6 +2,7 @@ import ServerlessGlobalAuthorizerPlugin = require('../../src');
 import { mockDeep } from 'jest-mock-extended';
 import * as Serverless from 'serverless';
 import { ServerlessGlobalAuthorizerError } from '../../src/serverless-global-authorizer-error';
+import { defineServerlessSchema } from '../../src/define-serverless-schema';
 
 type FunctionTestCaseData = {
   name: string;
@@ -10,6 +11,10 @@ type FunctionTestCaseData = {
 };
 
 const serverless = mockDeep<Serverless>();
+
+jest.mock('../../src/define-serverless-schema', () => ({
+  defineServerlessSchema: jest.fn(),
+}));
 
 const mockServerlessForTestCases = (functions: FunctionTestCaseData[]) => {
   serverless.service.getAllFunctions.mockReturnValue(functions.map((f) => f.name));
@@ -25,10 +30,11 @@ const assertModifiedInputEventsMatchExpectations = (functions: FunctionTestCaseD
 };
 
 describe('plugin tests', () => {
-  it('locks plugin to AWS provider only', () => {
+  it('constructor locks plugin to AWS provider only and defines serverless schema', () => {
     const result = new ServerlessGlobalAuthorizerPlugin(serverless);
 
     expect(serverless.getProvider).toHaveBeenCalledWith('aws');
+    expect(defineServerlessSchema).toHaveBeenCalledWith(serverless);
     expect(result).toBeInstanceOf(ServerlessGlobalAuthorizerPlugin);
   });
 
@@ -71,6 +77,52 @@ describe('plugin tests', () => {
     );
   });
 
+  it('throws error when globalAuthorizerEnabled http event property is not boolean', () => {
+    const plugin = new ServerlessGlobalAuthorizerPlugin(serverless);
+    serverless.service.custom = {
+      globalAuthorizer: {
+        http: { authorizer: 'aws_iam' },
+      },
+    };
+    serverless.service.getAllFunctions.mockReturnValue(['function1']);
+    serverless.service.getAllEventsInFunction.mockReturnValue([
+      {
+        http: { path: '/test', method: 'get', globalAuthorizerEnabled: 'invalid' },
+      },
+    ]);
+
+    expect(() => {
+      plugin.hooks['before:package:initialize']();
+    }).toThrowError(
+      new ServerlessGlobalAuthorizerError(
+        '"globalAuthorizerEnabled" property needs to be of boolean type. "invalid" passed as a value',
+      ),
+    );
+  });
+
+  it('throws error when globalAuthorizerEnabled httpApi event property is not boolean', () => {
+    const plugin = new ServerlessGlobalAuthorizerPlugin(serverless);
+    serverless.service.custom = {
+      globalAuthorizer: {
+        httpApi: { authorizer: { type: 'aws_iam' } },
+      },
+    };
+    serverless.service.getAllFunctions.mockReturnValue(['function1']);
+    serverless.service.getAllEventsInFunction.mockReturnValue([
+      {
+        httpApi: { path: '/test', method: 'post', globalAuthorizerEnabled: 'invalid' },
+      },
+    ]);
+
+    expect(() => {
+      plugin.hooks['before:package:initialize']();
+    }).toThrowError(
+      new ServerlessGlobalAuthorizerError(
+        '"globalAuthorizerEnabled" property needs to be of boolean type. "invalid" passed as a value',
+      ),
+    );
+  });
+
   describe('when REST API Gateway global authorizer used', () => {
     const lambdaAuthorizer = {
       name: 'authorizerFunc',
@@ -101,8 +153,12 @@ describe('plugin tests', () => {
           },
           {
             name: 'httpThatShouldNotHaveAuthorizerFunction',
-            inputEvents: [{ http: { path: '/open', method: 'get', authorizer: null } }],
-            expectedEvents: [{ http: { path: '/open', method: 'get', authorizer: null } }],
+            inputEvents: [
+              { http: { path: '/open', method: 'get', globalAuthorizerEnabled: false } },
+            ],
+            expectedEvents: [
+              { http: { path: '/open', method: 'get', globalAuthorizerEnabled: false } },
+            ],
           },
           {
             name: 'httpProxyResourceFunction',
@@ -113,6 +169,22 @@ describe('plugin tests', () => {
             name: 'httpRootPathShortSyntaxFunction',
             inputEvents: [{ http: 'PUT /' }],
             expectedEvents: [{ http: { method: 'PUT', path: '/', authorizer: 'aws_iam' } }],
+          },
+          {
+            name: 'httpWithExplicitlyEnabledGlobalAuthorizerFunction',
+            inputEvents: [
+              { http: { path: '/test', method: 'post', globalAuthorizerEnabled: true } },
+            ],
+            expectedEvents: [
+              {
+                http: {
+                  path: '/test',
+                  method: 'post',
+                  globalAuthorizerEnabled: true,
+                  authorizer: 'aws_iam',
+                },
+              },
+            ],
           },
         ],
       ],
@@ -197,8 +269,12 @@ describe('plugin tests', () => {
           },
           {
             name: 'httpApiThatShouldNotHaveAuthorizerFunction',
-            inputEvents: [{ httpApi: { path: '/open', method: 'get', authorizer: null } }],
-            expectedEvents: [{ httpApi: { path: '/open', method: 'get', authorizer: null } }],
+            inputEvents: [
+              { httpApi: { path: '/open', method: 'get', globalAuthorizerEnabled: false } },
+            ],
+            expectedEvents: [
+              { httpApi: { path: '/open', method: 'get', globalAuthorizerEnabled: false } },
+            ],
           },
         ],
       ],
@@ -258,6 +334,22 @@ describe('plugin tests', () => {
                 httpApi: {
                   path: '/path1',
                   method: 'GET',
+                  authorizer: { name: 'customHttpAuthorizer' },
+                },
+              },
+            ],
+          },
+          {
+            name: 'httpApiWithExplicitlyEnabledGlobalAuthorizerFunction',
+            inputEvents: [
+              { httpApi: { path: '/path', method: 'post', globalAuthorizerEnabled: true } },
+            ],
+            expectedEvents: [
+              {
+                httpApi: {
+                  path: '/path',
+                  method: 'post',
+                  globalAuthorizerEnabled: true,
                   authorizer: { name: 'customHttpAuthorizer' },
                 },
               },
