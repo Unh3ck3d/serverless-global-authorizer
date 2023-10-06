@@ -5,7 +5,7 @@
 
 <h3 align="center">serverless-global-authorizer</h3>
 <p align="center">
- A plugin for the Serverless framework which configures API Gateway authorizer globally for all lambda backed API Gateway endpoints
+ Serverless framework plugin which allows to configure API Gateway authorizer globally and applies it for all http/httpApi lambda function events
 <br />
 <a href="https://github.com/Unh3ck3d/serverless-global-authorizer/issues">Report Bug</a>
 ·
@@ -18,14 +18,14 @@ Currently, serverless framework does not allow to specify authorizer globally fo
 configuration duplication and potential security issue in case someone forgot to apply authorizer to a new lambda function.
 
 With this plugin you can configure authorizer globally, and it will be automatically
-applied to all your lambda functions with either `http` or `httpApi` events.
+applied to all your `http` or `httpApi` lambda function events.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Requirements
 
-* [Serverless framework](https://www.serverless.com/)
-* [Node.js](https://nodejs.org)
+* [Serverless framework](https://www.serverless.com/) >= 2.32
+* [Node.js](https://nodejs.org) >= 12
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -79,11 +79,10 @@ After you define global authorizer under
 * `custom.globalAuthorizer.restApi.authorizer` key - for REST API Gateway
 * `custom.globalAuthorizer.httpApi.authorizer` key - for HTTP API Gateway
 
-plugin will apply its configuration for all your lambda functions
-with matching event type (`http` or `httpApi`).
+plugin will apply iit for all `http` or `httpApi` events of your lambda functions.
 
 If you don't want to apply global authorizer for given endpoint,
-simply set `authorizer: null` on lambda event level
+simply set `globalAuthorizerEnabled` event property to `false`.
 <br/>e.g.
 ```yaml
 functions:
@@ -93,7 +92,7 @@ functions:
       - http:
           path: /open
           method: get
-          authorizer: null
+          globalAuthorizerEnabled: false
 ```
 
 If your endpoint has authorizer specified in its config, plugin **won't** overwrite it

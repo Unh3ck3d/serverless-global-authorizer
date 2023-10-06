@@ -1,6 +1,9 @@
 import * as Serverless from 'serverless';
 import { ServerlessGlobalAuthorizerError } from './serverless-global-authorizer-error';
 import Aws from 'serverless/aws';
+import { defineServerlessSchema } from './define-serverless-schema';
+
+type ApiGatewayEvent = (Aws.Http | Aws.HttpApiEvent) & { globalAuthorizerEnabled?: unknown };
 
 class ServerlessGlobalAuthorizerPlugin {
   public hooks = {
@@ -9,6 +12,8 @@ class ServerlessGlobalAuthorizerPlugin {
 
   public constructor(private serverless: Serverless) {
     serverless.getProvider('aws');
+
+    defineServerlessSchema(serverless);
   }
 
   public init() {
@@ -22,9 +27,19 @@ class ServerlessGlobalAuthorizerPlugin {
   }
 
   private processEvent(event: Serverless.Event) {
-    if ('http' in event && event.http && event.http.authorizer === undefined) {
+    if (
+      'http' in event &&
+      event.http &&
+      event.http.authorizer === undefined &&
+      ServerlessGlobalAuthorizerPlugin.isGlobalAuthorizerEnabledAtEventLevel(event.http)
+    ) {
       event.http = this.applyRestApiAuthorizer(event.http);
-    } else if ('httpApi' in event && event.httpApi && event.httpApi.authorizer === undefined) {
+    } else if (
+      'httpApi' in event &&
+      event.httpApi &&
+      event.httpApi.authorizer === undefined &&
+      ServerlessGlobalAuthorizerPlugin.isGlobalAuthorizerEnabledAtEventLevel(event.httpApi)
+    ) {
       event.httpApi = this.applyHttpApiAuthorizer(event.httpApi);
     }
   }
@@ -33,10 +48,6 @@ class ServerlessGlobalAuthorizerPlugin {
     // if event specified in shorthand syntax
     if (typeof event === 'string') {
       const [method, path] = event.split(' ');
-      if (!method || !path) {
-        throw new ServerlessGlobalAuthorizerError(`http event ${event} has invalid syntax`);
-      }
-
       event = { method, path };
     }
 
@@ -58,10 +69,6 @@ class ServerlessGlobalAuthorizerPlugin {
       }
 
       const [method, path] = event.split(' ');
-      if (!method || !path) {
-        throw new ServerlessGlobalAuthorizerError(`httpApi event '${event}' has invalid syntax`);
-      }
-
       event = { method, path };
     }
 
@@ -88,6 +95,20 @@ class ServerlessGlobalAuthorizerPlugin {
     }
 
     return this.serverless.service.custom.globalAuthorizer.httpApi?.authorizer;
+  }
+
+  private static isGlobalAuthorizerEnabledAtEventLevel(event: ApiGatewayEvent | string) {
+    if (typeof event === 'string' || event.globalAuthorizerEnabled === undefined) {
+      return true;
+    }
+
+    if (event.globalAuthorizerEnabled !== false && event.globalAuthorizerEnabled !== true) {
+      throw new ServerlessGlobalAuthorizerError(
+        `"globalAuthorizerEnabled" property needs to be of boolean type. "${event.globalAuthorizerEnabled}" passed as a value`,
+      );
+    }
+
+    return event.globalAuthorizerEnabled;
   }
 }
 
