@@ -1,6 +1,7 @@
 {
   "name": "serverless-global-authorizer",
-  "version": "1.0.1",
+  "version": "1.0.2",
+  "license": "MIT",
   "description": "Serverless framework plugin which allows to configure API Gateway authorizer globally and applies it for all http/httpApi lambda function events",
   "repository": "https://github.com/Unh3ck3d/serverless-global-authorizer",
   "main": "dist/index.js",
