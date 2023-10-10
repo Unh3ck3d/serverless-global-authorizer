@@ -2,7 +2,7 @@
 
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Unh3ck3d/serverless-global-authorizer/blob/main/LICENSE)
-[![Code coverage](https://img.shields.io/codecov/c/gh/Unh3ck3d/serverless-global-authorizer?label=codecov&logo=codecov&style=flat-square)](https://codecov.io/gh/ramsey/conventional-commits)
+[![Code coverage](https://img.shields.io/codecov/c/gh/Unh3ck3d/serverless-global-authorizer?label=codecov&logo=codecov&style=flat-square)](https://codecov.io/gh/Unh3ck3d/serverless-global-authorizer)
 
 <h3 align="center">serverless-global-authorizer</h3>
 <p align="center">
