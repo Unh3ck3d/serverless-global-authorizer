@@ -4,6 +4,9 @@ on:
   release:
     types: [ published ]
 
+concurrency:
+  group: ${{ github.workflow }}
+
 jobs:
   publish:
     runs-on: ubuntu-latest

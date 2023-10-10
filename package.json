@@ -43,6 +43,6 @@
     "build": "tsc",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "jest --coverage --coverageReporters text"
+    "test": "jest --coverage --coverageReporters text --coverageReporters lcov"
   }
 }
