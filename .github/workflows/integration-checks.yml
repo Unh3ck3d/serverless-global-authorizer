@@ -5,6 +5,11 @@ on:
     branches: [ main ]
   pull_request:
     types: [ opened, synchronize, reopened, edited ]
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   tests-unit:
@@ -17,6 +22,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run test
+      - uses: codecov/codecov-action@v3
 
   lint:
     runs-on: ubuntu-latest
